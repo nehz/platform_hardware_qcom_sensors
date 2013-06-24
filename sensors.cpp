@@ -55,6 +55,7 @@ static const struct sensor_t sSensorList[] = {
 	},
 
 	/* magnetic field sensor */
+	/*
 	{
 		"AK8975",
 		"Asahi Kasei Microdevices",
@@ -67,8 +68,10 @@ static const struct sensor_t sSensorList[] = {
 		16667,
 		{ }
 	},
+	*/
 
 	/* orientation sensor */
+	/*
 	{
 		"AK8975",
 		"Asahi Kasei Microdevices",
@@ -81,8 +84,10 @@ static const struct sensor_t sSensorList[] = {
 		16667 ,
 		{ }
 	},
+	*/
 
 	/* light sensor name */
+	/*
 	{
 		"TSL27713FN",
 		"Taos",
@@ -95,8 +100,10 @@ static const struct sensor_t sSensorList[] = {
 		0,
 		{ }
 	},
+	*/
 
 	/* proximity sensor */
+	/*
 	{
 		"TSL27713FN",
 		"Taos",
@@ -109,6 +116,7 @@ static const struct sensor_t sSensorList[] = {
 		0,
 		{ }
 	},
+	*/
 
 	/* gyro scope */
 	{
@@ -125,6 +133,7 @@ static const struct sensor_t sSensorList[] = {
 	},
 	
 	/* barometer */
+	/*
 	{
 		"bmp180",
 		"Bosch",
@@ -137,6 +146,7 @@ static const struct sensor_t sSensorList[] = {
 		20000,
 		{ }
 	}
+	*/
 };
 
 

@@ -53,7 +53,7 @@ static const struct sensor_t sSensorList[] = {
 		2000,	/* microseconds */
 		{ }
 	},
-
+#if 0
 	/* magnetic field sensor */
 	{
 		"AK8975",
@@ -109,7 +109,7 @@ static const struct sensor_t sSensorList[] = {
 		0,
 		{ }
 	},
-
+#endif
 	/* gyro scope */
 	{
 		"MPU3050",
@@ -123,7 +123,6 @@ static const struct sensor_t sSensorList[] = {
 		2000,
 		{ }
 	},
-	
 	/* barometer */
 	{
 		"bmp180",

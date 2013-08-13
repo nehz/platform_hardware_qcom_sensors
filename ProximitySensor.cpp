@@ -32,21 +32,60 @@
 #define PROXIMITY_THRESHOLD			5.0f
 /*****************************************************************************/
 
+enum input_device_name {
+    LEGACY_PSENSOR = 0,
+    CM36283_PS,
+    SUPPORTED_PSENSOR_COUNT,
+};
+
+static const char *data_device_name[] = {
+    [LEGACY_PSENSOR] = "proximity",
+        [CM36283_PS] = "cm36283-ps",
+};
+
+static const char *input_sysfs_path_list[] = {
+    [LEGACY_PSENSOR] = "/sys/class/input/*/device/",
+        [CM36283_PS] = "/sys/class/optical_sensors/proximity/",
+};
+
+static const char *input_sysfs_enable_list[] = {
+    [LEGACY_PSENSOR] = "enable",
+        [CM36283_PS] = "ps_adc",
+};
+
+
 ProximitySensor::ProximitySensor()
-    : SensorBase(NULL, "proximity"),
+    : SensorBase(NULL, NULL),
       mEnabled(0),
       mInputReader(4),
       mHasPendingEvent(false)
 {
+    int i;
+    char *tok = NULL;
     mPendingEvent.version = sizeof(sensors_event_t);
     mPendingEvent.sensor = SENSORS_PROXIMITY_HANDLE;
     mPendingEvent.type = SENSOR_TYPE_PROXIMITY;
     memset(mPendingEvent.data, 0, sizeof(mPendingEvent.data));
 
+    for(i = 0; i < SUPPORTED_PSENSOR_COUNT; i++) {
+        data_name = data_device_name[i];
+        data_fd = openInput(data_name);
+        if (data_fd > 0) {
+            sensor_index = i;
+            break;
+        }
+    }
+
     if (data_fd) {
-        strcpy(input_sysfs_path, "/sys/class/input/");
-        strcat(input_sysfs_path, input_name);
-        strcat(input_sysfs_path, "/device/");
+        strcpy(input_sysfs_path, input_sysfs_path_list[i]);
+        tok = strchr(input_sysfs_path_list[i], '*');
+        if (NULL != tok) {
+            memcpy(input_sysfs_path, input_sysfs_path_list[i], tok - input_sysfs_path_list[i]);
+
+            input_sysfs_path[tok - input_sysfs_path_list[i]] = '\0';
+            strcat(input_sysfs_path, input_name);
+            strcat(input_sysfs_path, tok + 1);
+        }
         input_sysfs_path_len = strlen(input_sysfs_path);
         enable(0, 1);
     }
@@ -72,7 +111,7 @@ int ProximitySensor::enable(int32_t, int en) {
     int flags = en ? 1 : 0;
     if (flags != mEnabled) {
         int fd;
-        strcpy(&input_sysfs_path[input_sysfs_path_len], "enable");
+        strcpy(&input_sysfs_path[input_sysfs_path_len], input_sysfs_enable_list[sensor_index]);
         fd = open(input_sysfs_path, O_RDWR);
         if (fd >= 0) {
             char buf[2];

@@ -29,21 +29,70 @@
 #define EVENT_TYPE_LIGHT		ABS_MISC
 /*****************************************************************************/
 
+enum input_device_name {
+	LIGHTSENSOR_LEVEL = 0,
+	CM36283_LS,
+	SUPPORTED_LSENSOR_COUNT,
+};
+
+enum {
+	TYPE_ADC = 0,
+	TYPE_LUX,
+};
+
+static const char *data_device_name[] = {
+	[LIGHTSENSOR_LEVEL] = "lightsensor-level",
+	[CM36283_LS] = "cm36283-ls",
+};
+
+static const char *input_sysfs_path_list[] = {
+	[LIGHTSENSOR_LEVEL] = "/sys/class/input/*/device/",
+	[CM36283_LS] = "/sys/class/optical_sensors/lightsensor/",
+};
+
+static const char *input_sysfs_enable_list[] = {
+	[LIGHTSENSOR_LEVEL] = "enable",
+	[CM36283_LS] = "ls_auto",
+};
+
+static const int input_report_type[] = {
+	[LIGHTSENSOR_LEVEL] = TYPE_ADC,
+	[CM36283_LS] = TYPE_LUX,
+};
+
 LightSensor::LightSensor()
-	: SensorBase(NULL, "lightsensor-level"),
+: SensorBase(NULL, NULL),
 	  mEnabled(0),
 	  mInputReader(4),
-	  mHasPendingEvent(false)
+	  mHasPendingEvent(false),
+	  sensor_index(-1)
 {
+	int i;
+	char *tok = NULL;
+
 	mPendingEvent.version = sizeof(sensors_event_t);
 	mPendingEvent.sensor = SENSORS_LIGHT_HANDLE;
 	mPendingEvent.type = SENSOR_TYPE_LIGHT;
 	memset(mPendingEvent.data, 0, sizeof(mPendingEvent.data));
 
+	for(i = 0; i < SUPPORTED_LSENSOR_COUNT; i++) {
+		data_name = data_device_name[i];
+		data_fd = openInput(data_name);
+		if (data_fd > 0) {
+			sensor_index = i;
+			break;
+		}
+	}
+
 	if (data_fd) {
-		strcpy(input_sysfs_path, "/sys/class/input/");
-		strcat(input_sysfs_path, input_name);
-		strcat(input_sysfs_path, "/device/");
+		strcpy(input_sysfs_path, input_sysfs_path_list[i]);
+		tok = strchr(input_sysfs_path_list[i], '*');
+		if (NULL != tok) {
+			memcpy(input_sysfs_path, input_sysfs_path_list[i], tok - input_sysfs_path_list[i]);
+			input_sysfs_path[tok - input_sysfs_path_list[i]] = '\0';
+			strcat(input_sysfs_path, input_name);
+			strcat(input_sysfs_path, tok + 1);
+		}
 		input_sysfs_path_len = strlen(input_sysfs_path);
 		enable(0, 1);
 	}
@@ -75,7 +124,11 @@ int LightSensor::enable(int32_t handle, int en)
 	int flags = en ? 1 : 0;
 	if (flags != mEnabled) {
 		int fd;
-		strcpy(&input_sysfs_path[input_sysfs_path_len], "enable");
+		if (sensor_index >= 0) {
+			strcpy(&input_sysfs_path[input_sysfs_path_len], input_sysfs_enable_list[sensor_index]);
+		}
+		else
+			return -1;
 		fd = open(input_sysfs_path, O_RDWR);
 		if (fd >= 0) {
 			char buf[2];
@@ -123,12 +176,7 @@ int LightSensor::readEvents(sensors_event_t* data, int count)
 		int type = event->type;
 		if (type == EV_ABS) {
 			if (event->code == EVENT_TYPE_LIGHT) {
-				// Convert adc value to lux assuming:
-				// I = 10 * log(Ev) uA
-				// R = 47kOhm
-				// Max adc value 4095 = 3.3V
-				// 1/4 of light reaches sensor
-				mPendingEvent.light = powf(10, event->value * (330.0f / 4095.0f / 47.0f)) * 4;
+				mPendingEvent.light = convertEvent(event->value);
 			}
 		} else if (type == EV_SYN) {
 			mPendingEvent.timestamp = timevalToNano(event->time);
@@ -145,4 +193,25 @@ int LightSensor::readEvents(sensors_event_t* data, int count)
 	}
 
 	return numEventReceived;
+}
+
+float LightSensor::convertEvent(int value)
+{
+	float lux;
+
+	if (input_report_type[sensor_index] == TYPE_ADC) {
+		// Convert adc value to lux assuming:
+		// I = 10 * log(Ev) uA
+		// R = 47kOhm
+		// Max adc value 4095 = 3.3V
+		// 1/4 of light reaches sensor
+		lux =  powf(10, value * (330.0f / 4095.0f / 47.0f)) * 4;
+	} else if (input_report_type[sensor_index] == TYPE_LUX) {
+		lux = value;
+	} else {
+		ALOGE("LightSensor: unknown report type\n");
+		lux = 0;
+	}
+
+	return lux;
 }

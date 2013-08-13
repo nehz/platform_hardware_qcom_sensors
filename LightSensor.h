@@ -36,7 +36,6 @@ class LightSensor : public SensorBase {
 	bool mHasPendingEvent;
 	char input_sysfs_path[PATH_MAX];
 	int input_sysfs_path_len;
-	int sensor_index;
 
 	int setInitialState();
 
@@ -47,7 +46,6 @@ public:
 	virtual bool hasPendingEvents() const;
 	virtual int setDelay(int32_t handle, int64_t ns);
 	virtual int enable(int32_t handle, int enabled);
-	virtual float convertEvent(int value);
 };
 
 /*****************************************************************************/

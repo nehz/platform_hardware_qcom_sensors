@@ -294,8 +294,13 @@ static int sensors__get_sensors_list(struct sensors_module_t* module,
 		*list = sensor_list;
 		return dynamic_sensor_number;
 	} else { /* If we could not find any sensor folder, load the default.*/
+#if 0
 		*list = sSensorList;
 		return ARRAY_SIZE(sSensorList);
+#else
+		*list = NULL;
+		return 0;
+#endif
 	}
 }
 
@@ -375,6 +380,7 @@ sensors_poll_context_t::sensors_poll_context_t()
 	number = get_sensors_list();
 
 	if(number <= 0){ /* use the static sensor list */
+#if 0
 		light = 0;
 		proximity = 1;
 		compass = 2;
@@ -412,6 +418,7 @@ sensors_poll_context_t::sensors_poll_context_t()
 		mPollFds[pressure].fd = mSensors[pressure]->getFd();
 		mPollFds[pressure].events = POLLIN;
 		mPollFds[pressure].revents = 0;
+#endif
 
 	} else { /* use the dynamic sensor list */
 		for (handle = 0; handle < number; handle++) {

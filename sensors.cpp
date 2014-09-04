@@ -53,7 +53,7 @@ static const struct sensor_t sSensorList[] = {
 		2000,	/* microseconds */
 		0,
 		0,
-		{ }
+		" "
 	},
 
 	/* magnetic field sensor */
@@ -68,7 +68,7 @@ static const struct sensor_t sSensorList[] = {
 		(1.0f/16.0f),
 		6.8f,
 		16667,
-		{ }
+		" "
 	},
 	*/
 
@@ -84,7 +84,7 @@ static const struct sensor_t sSensorList[] = {
 		(1.0f/64.0f),
 		7.8f,
 		16667 ,
-		{ }
+		" "
 	},
 	*/
 
@@ -100,7 +100,7 @@ static const struct sensor_t sSensorList[] = {
 		1.0f,
 		0.75f,
 		0,
-		{ }
+		" "
 	},
 	*/
 
@@ -116,7 +116,7 @@ static const struct sensor_t sSensorList[] = {
 		5.0f,
 		0.75f,
 		0,
-		{ }
+		" "
 	},
 	*/
 
@@ -133,7 +133,7 @@ static const struct sensor_t sSensorList[] = {
 		2000,
 		0,
 		0,
-		{ }
+		" "
 	},
 	
 	/* barometer */
@@ -148,7 +148,7 @@ static const struct sensor_t sSensorList[] = {
 		0.01f,
 		0.67f,
 		20000,
-		{ }
+		" "
 	}
 	*/
 };
@@ -195,10 +195,10 @@ private:
 	enum {
 		light			= 0,
 		proximity		= 1,
-		compass			= 2,
-		gyro			= 3,
-		accel			= 4,
-		pressure		= 5,
+		//compass			= 2,
+		gyro			= 2,
+		accel			= 3,
+		pressure		= 4,
 		numSensorDrivers,
 		numFds,
 	};
@@ -213,9 +213,9 @@ private:
 		switch (handle) {
 			case SENSORS_ACCELERATION_HANDLE:
 				return accel;
-			case SENSORS_MAGNETIC_FIELD_HANDLE:
+			/*case SENSORS_MAGNETIC_FIELD_HANDLE:
 			case SENSORS_ORIENTATION_HANDLE:
-				return compass;
+				return compass;*/
 			case SENSORS_PROXIMITY_HANDLE:
 				return proximity;
 			case SENSORS_LIGHT_HANDLE:
@@ -242,12 +242,12 @@ sensors_poll_context_t::sensors_poll_context_t()
 	mPollFds[proximity].fd = mSensors[proximity]->getFd();
 	mPollFds[proximity].events = POLLIN;
 	mPollFds[proximity].revents = 0;
-
+#if 0
 	mSensors[compass] = new AkmSensor();
 	mPollFds[compass].fd = mSensors[compass]->getFd();
 	mPollFds[compass].events = POLLIN;
 	mPollFds[compass].revents = 0;
-
+#endif
 	mSensors[gyro] = new GyroSensor();
 	mPollFds[gyro].fd = mSensors[gyro]->getFd();
 	mPollFds[gyro].events = POLLIN;

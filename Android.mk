@@ -56,7 +56,7 @@ else
     LOCAL_C_INCLUDES += external/icu4c/common
 endif
 
-LOCAL_SHARED_LIBRARIES := liblog libcutils libdl libxml2 libicuuc
+LOCAL_SHARED_LIBRARIES := liblog libcutils libdl libxml2 libutils
 
 include $(BUILD_SHARED_LIBRARY)
 

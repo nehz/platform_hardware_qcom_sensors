@@ -13,7 +13,7 @@ else
   ifneq ($(filter msm8916 msm8909,$(TARGET_BOARD_PLATFORM)),)
     LOCAL_MODULE := sensors.$(TARGET_BOARD_PLATFORM)
   else
-    LOCAL_MODULE := sensors.msm8930
+    LOCAL_MODULE := sensors.msm8960
   endif
 endif
 
@@ -24,11 +24,6 @@ LOCAL_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)/hw
 endif
 
 LOCAL_MODULE_TAGS := optional
-
-LOCAL_CFLAGS += -DLOG_TAG=\"Sensors\"
-ifeq ($(call is-board-platform,msm8960),true)
-  LOCAL_CFLAGS += -DTARGET_8930
-endif
 
 LOCAL_C_INCLUDES := $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/include
 LOCAL_ADDITIONAL_DEPENDENCIES := $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr

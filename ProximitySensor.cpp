@@ -64,7 +64,6 @@ static const char *input_sysfs_enable_list[SUPPORTED_PSENSOR_COUNT] = {
 
 ProximitySensor::ProximitySensor()
     : SensorBase(NULL, NULL),
-      mEnabled(0),
       mInputReader(4),
       mHasPendingEvent(false),
       sensor_index(-1),
@@ -101,8 +100,7 @@ ProximitySensor::ProximitySensor()
 }
 
 ProximitySensor::ProximitySensor(struct SensorContext *context)
-	: SensorBase(NULL, NULL),
-	  mEnabled(0),
+	: SensorBase(NULL, NULL, context),
 	  mInputReader(4),
 	  mHasPendingEvent(false),
 	  sensor_index(GENERIC_PSENSOR),
@@ -122,7 +120,6 @@ ProximitySensor::ProximitySensor(struct SensorContext *context)
 
 ProximitySensor::ProximitySensor(char *name)
 	: SensorBase(NULL, data_device_name[GENERIC_PSENSOR]),
-	  mEnabled(0),
 	  mInputReader(4),
 	  mHasPendingEvent(false),
 	  sensor_index(GENERIC_PSENSOR),

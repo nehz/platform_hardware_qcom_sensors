@@ -231,7 +231,6 @@ int SensorBase::flush(int32_t handle)
                         return -1;
                 }
                 close(fd);
-                return 0;
         }
 
         mHasPendingMetadata = true;

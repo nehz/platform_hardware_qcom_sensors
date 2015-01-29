@@ -363,6 +363,7 @@ int NativeSensorManager::getDataInfo() {
 	struct sensor_t sensor_acc;
 	struct sensor_t sensor_light;
 	struct sensor_t sensor_proximity;
+	struct sensor_t sensor_gyro;
 
 	strlcpy(path, EVENT_PATH, sizeof(path));
 	file = path + strlen(EVENT_PATH);
@@ -462,6 +463,7 @@ int NativeSensorManager::getDataInfo() {
 			case SENSOR_TYPE_GYROSCOPE:
 				has_gyro = 1;
 				list->driver = new GyroSensor(list);
+				sensor_gyro = *(list->sensor);
 				break;
 			case SENSOR_TYPE_PRESSURE:
 				list->driver = new PressureSensor(list);
@@ -547,6 +549,15 @@ int NativeSensorManager::getDataInfo() {
 		if (!initVirtualSensor(&context[mSensorCount], SENSORS_HANDLE(mSensorCount),
 					sensor_mag)) {
 			addDependency(&context[mSensorCount], sensor_mag.handle);
+			mSensorCount++;
+		}
+	}
+
+	if (has_gyro) {
+		sensor_gyro.type = SENSOR_TYPE_GYROSCOPE_UNCALIBRATED;
+		if (!initVirtualSensor(&context[mSensorCount], SENSORS_HANDLE(mSensorCount),
+					sensor_gyro)) {
+			addDependency(&context[mSensorCount], sensor_gyro.handle);
 			mSensorCount++;
 		}
 	}
@@ -1060,7 +1071,7 @@ int NativeSensorManager::calibrate(int handle, struct cal_cmd_t *para)
 	if (!para->save) {
 		return err;
 	}
-	err = sensor_XML.write_sensors_params(list->sensor, &cal_result);
+	err = sensor_XML.write_sensors_params(list->sensor, &cal_result, CAL_STATIC);
 	if (err < 0) {
 		ALOGE("write calibrate %s sensor error\n", list->sensor->name);
 		return err;
@@ -1079,7 +1090,7 @@ int NativeSensorManager::initCalibrate(const SensorContext *list)
 		return -EINVAL;
 	}
 	memset(&cal_result, 0, sizeof(cal_result));
-	err = sensor_XML.read_sensors_params(list->sensor, &cal_result);
+	err = sensor_XML.read_sensors_params(list->sensor, &cal_result, CAL_STATIC);
 	if (err < 0) {
 		ALOGE("read %s calibrate params error\n", list->sensor->name);
 		return err;

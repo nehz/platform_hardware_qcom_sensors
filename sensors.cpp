@@ -50,7 +50,7 @@ static const struct sensor_t sSensorList[] = {
 		(2.0f * 9.81f),
 		(9.81f / 1024),
 		0.2f,		/* mA */
-		2000,	/* microseconds */
+		10000,	/* microseconds */
 		0,
 		0,
 		" "
@@ -130,7 +130,7 @@ static const struct sensor_t sSensorList[] = {
 		35.0f,
 		0.06f,
 		0.2f,
-		2000,
+		10000,
 		0,
 		0,
 		" "

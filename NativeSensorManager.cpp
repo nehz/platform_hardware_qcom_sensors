@@ -378,10 +378,11 @@ void NativeSensorManager::compositeVirtualSensorName(const char *sensor_name, ch
 }
 
 int NativeSensorManager::getDataInfo() {
-	DIR *dir;
+	struct dirent **namelist;
 	char *file;
 	char path[PATH_MAX];
 	char name[80];
+	int nNodes;
 	int i, j;
 	int fd = -1;
 	struct SensorContext *list;
@@ -399,25 +400,18 @@ int NativeSensorManager::getDataInfo() {
 
 	strlcpy(path, EVENT_PATH, sizeof(path));
 	file = path + strlen(EVENT_PATH);
-	dir = opendir(path);
-	if(dir == NULL) {
-		ALOGE("open %s failed.(%s)\n", EVENT_PATH, strerror(errno));
+	nNodes = scandir(path, &namelist, 0, alphasort);
+	if (nNodes < 0) {
+		ALOGE("scan %s failed.(%s)\n", EVENT_PATH, strerror(errno));
 		return -1;
 	}
 
-	struct dirent dent;
-	struct dirent *result;
-	for (event_count = 0, j = 0; j < MAX_SENSORS; j++) {
-		int err = readdir_r(dir, &dent, &result);
-		if ((err != 0) || (result == NULL)) {
-			break;
-		}
-
-		if (result->d_type != DT_CHR) {
+	for (event_count = 0, j = 0; (j < nNodes) && (j < MAX_SENSORS); j++) {
+		if (namelist[j]->d_type != DT_CHR) {
 			continue;
 		}
 
-		strlcpy(file, result->d_name, sizeof(path) - strlen(EVENT_PATH));
+		strlcpy(file, namelist[j]->d_name, sizeof(path) - strlen(EVENT_PATH));
 
 		fd = open(path, O_RDONLY);
 		if (fd < 0) {
@@ -434,7 +428,12 @@ int NativeSensorManager::getDataInfo() {
 		close(fd);
 		event_count++;
 	}
-	closedir(dir);
+
+	for (j = 0; j <nNodes; j++ ) {
+		free(namelist[j]);
+	}
+
+	free(namelist);
 
 	mSensorCount = getSensorListInner();
 	for (i = 0; i < mSensorCount; i++) {

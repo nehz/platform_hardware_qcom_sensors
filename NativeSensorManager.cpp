@@ -670,11 +670,10 @@ int NativeSensorManager::getNode(char *buf, char *path, const struct SysfsMap *m
 
 int NativeSensorManager::getEventPathOld(const struct SensorContext *list, char *event_path)
 {
-	struct dirent **namelist;
+	DIR *dir;
 	char *file;
 	char path[PATH_MAX];
 	char name[80];
-	int nNodes;
 	int fd = -1;
 	int j;
 
@@ -682,18 +681,25 @@ int NativeSensorManager::getEventPathOld(const struct SensorContext *list, char 
 	if (!mScanned) {
 		strlcpy(path, EVENT_PATH, sizeof(path));
 		file = path + strlen(EVENT_PATH);
-		nNodes = scandir(path, &namelist, 0, alphasort);
-		if (nNodes < 0) {
-			ALOGE("scan %s failed.(%s)\n", EVENT_PATH, strerror(errno));
+		dir = opendir(path);
+		if (dir == NULL) {
+			ALOGE("open %s failed.(%s)\n", EVENT_PATH, strerror(errno));
 			return -1;
 		}
 
-		for (mEventCount = 0, j = 0; (j < nNodes) && (j < MAX_SENSORS); j++) {
-			if (namelist[j]->d_type != DT_CHR) {
+		struct dirent dent;
+		struct dirent *result;
+		for (mEventCount = 0, j = 0; j < MAX_SENSORS; j++) {
+			int err = readdir_r(dir, &dent, &result);
+			if ((err != 0) || (result == NULL)) {
+				break;
+			}
+
+			if (result->d_type != DT_CHR) {
 				continue;
 			}
 
-			strlcpy(file, namelist[j]->d_name, sizeof(path) - strlen(EVENT_PATH));
+			strlcpy(file, result->d_name, sizeof(path) - strlen(EVENT_PATH));
 
 			fd = open(path, O_RDONLY);
 			if (fd < 0) {
@@ -710,12 +716,8 @@ int NativeSensorManager::getEventPathOld(const struct SensorContext *list, char 
 			close(fd);
 			mEventCount++;
 		}
+		closedir(dir);
 
-		for (j = 0; j <nNodes; j++ ) {
-			free(namelist[j]);
-		}
-
-		free(namelist);
 		mScanned = true;
 	}
 

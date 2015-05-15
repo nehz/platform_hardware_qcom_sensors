@@ -98,7 +98,7 @@ AccelSensor::AccelSensor(char *name)
 }
 
 AccelSensor::AccelSensor(SensorContext *context)
-	: SensorBase(NULL, NULL),
+	: SensorBase(NULL, NULL, context),
 	  mEnabled(0),
 	  mInputReader(4),
 	  mHasPendingEvent(false),

@@ -36,7 +36,7 @@
 #define	EVENT_TYPE_ACCEL_Y	ABS_Y
 #define	EVENT_TYPE_ACCEL_Z	ABS_Z
 
-#define ACCEL_CONVERT		((GRAVITY_EARTH) / 1024)
+#define ACCEL_CONVERT		((GRAVITY_EARTH) / 16384) /* (4 * 1G / 2^16) */
 #define CONVERT_ACCEL_X		ACCEL_CONVERT
 #define CONVERT_ACCEL_Y		ACCEL_CONVERT
 #define CONVERT_ACCEL_Z		ACCEL_CONVERT
@@ -98,7 +98,7 @@ AccelSensor::AccelSensor(char *name)
 }
 
 AccelSensor::AccelSensor(SensorContext *context)
-	: SensorBase(NULL, NULL),
+	: SensorBase(NULL, NULL, context),
 	  mEnabled(0),
 	  mInputReader(4),
 	  mHasPendingEvent(false),

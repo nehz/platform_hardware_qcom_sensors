@@ -844,6 +844,10 @@ int NativeSensorManager::readEvents(int handle, sensors_event_t* data, int count
 		return -EINVAL;
 	}
 	do {
+                if (list->driver == NULL) {
+                        ALOGE("Invalid sensor handle is %d",handle);
+                        return -EINVAL;
+                }
 		nb = list->driver->readEvents(data, count);
 	} while ((nb == -EAGAIN) || (nb == -EINTR));
 
@@ -851,6 +855,10 @@ int NativeSensorManager::readEvents(int handle, sensors_event_t* data, int count
 		list_for_each(node, &list->listener) {
 			item = node_to_item(node, struct SensorRefMap, list);
 			if (item->ctx->enable) {
+                                if (item->ctx->driver == NULL) {
+                                        ALOGE("Invalid sensor");
+                                        return -EINVAL;
+                                }
 				item->ctx->driver->injectEvents(&data[j], 1);
 			}
 		}

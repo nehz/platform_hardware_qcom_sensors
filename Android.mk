@@ -8,6 +8,7 @@ include $(CLEAR_VARS)
 ifneq ($(filter msm8610,$(TARGET_BOARD_PLATFORM)),)
   LOCAL_MODULE := sensors.$(TARGET_BOARD_PLATFORM)
   LOCAL_CFLAGS := -DTARGET_8610
+  LOCAL_CFLAGS += -Wno-error=implicit-function-declaration
 else
   LOCAL_MODULE := sensors.msm8930
 endif
@@ -16,9 +17,10 @@ LOCAL_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)/hw
 
 LOCAL_MODULE_TAGS := optional
 
-LOCAL_CFLAGS += -DLOG_TAG=\"Sensors\"
+LOCAL_CFLAGS += -DLOG_TAG=\"Sensors\" -Wno-error=implicit-function-declaration
 ifeq ($(call is-board-platform,msm8960),true)
   LOCAL_CFLAGS += -DTARGET_8930
+  LOCAL_CFLAGS += -Wno-error=implicit-function-declaration
 endif
 
 LOCAL_SRC_FILES :=	\

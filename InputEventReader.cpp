@@ -17,6 +17,8 @@
 #include <stdint.h>
 #include <errno.h>
 #include <unistd.h>
+#include <stdlib.h>
+#include <string.h>
 #include <poll.h>
 
 #include <sys/cdefs.h>

@@ -45,6 +45,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 VirtualSensor::VirtualSensor(const struct SensorContext *ctx)
 	: SensorBase(NULL, NULL, ctx),
 	  reportLastEvent(false),
+	  mFirstEventReceived(false),
 	  context(ctx),
 	  mRead(mBuffer),
 	  mWrite(mBuffer),
@@ -66,6 +67,7 @@ int VirtualSensor::enable(int32_t, int en) {
 
 	if (mEnabled != flag) {
 		mEnabled = flag;
+		mFirstEventReceived = false;
 		arg.enable = mEnabled;
 		if ((algo != NULL) && (algo->methods->config != NULL)) {
 			if (algo->methods->config(CMD_ENABLE, (sensor_algo_args*)&arg)) {
@@ -73,7 +75,7 @@ int VirtualSensor::enable(int32_t, int en) {
 			}
 		}
 	} else if (flag) {
-		reportLastEvent = true;
+		reportLastEvent = mFirstEventReceived ? true : false;
 	}
 
 	return 0;
@@ -111,6 +113,8 @@ int VirtualSensor::readEvents(sensors_event_t* data, int count)
 		number++;
 		mFreeSpace++;
 		count--;
+		if (!mFirstEventReceived)
+			mFirstEventReceived = true;
 	}
 
 	if (number > 0)

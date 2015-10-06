@@ -470,17 +470,6 @@ int NativeSensorManager::getDataInfo() {
 	struct SensorRefMap *ref;
 	char *chip;
 
-	if (has_light && has_proximity) {
-		compositeVirtualSensorName(sensor_proximity.name, virtualSensorName[POCKET], SENSOR_TYPE_POCKET);
-		ALOGD("pocket virtual sensor name changed to %s\n", virtualSensorName[POCKET]);
-		if (!initVirtualSensor(&context[mSensorCount], SENSORS_HANDLE(mSensorCount),
-				virtualSensorList[POCKET])) {
-			addDependency(&context[mSensorCount], sensor_proximity.handle);
-			addDependency(&context[mSensorCount], sensor_light.handle);
-			mSensorCount++;
-		}
-	}
-
 	if (has_acc && has_compass) {
 		compositeVirtualSensorName(sensor_mag.name, virtualSensorName[ORIENTATION], SENSOR_TYPE_ORIENTATION);
 		ALOGD("orientation virtual sensor name changed to %s\n", virtualSensorName[ORIENTATION]);
@@ -493,51 +482,6 @@ int NativeSensorManager::getDataInfo() {
 			addDependency(&context[mSensorCount], sensor_acc.handle);
 			addDependency(&context[mSensorCount], sensor_mag.handle);
 			mSensorCount++;
-		}
-
-		if (!has_gyro) {
-			compositeVirtualSensorName(sensor_mag.name, virtualSensorName[ORIENTATION], SENSOR_TYPE_ORIENTATION);
-			ALOGD("orientation virtual sensor name changed to %s\n", virtualSensorName[ORIENTATION]);
-			/* Pseudo gyroscope is a pseudo sensor which implements by accelerometer and
-			 * magnetometer. Some sensor vendors provide such implementations. The pseudo
-			 * gyroscope sensor is low cost but the performance is worse than the actual
-			 * gyroscope. So disable it for the system with actual gyroscope. */
-			if (!initVirtualSensor(&context[mSensorCount], SENSORS_HANDLE(mSensorCount),
-						virtualSensorList[PSEUDO_GYROSCOPE])) {
-				addDependency(&context[mSensorCount], sensor_acc.handle);
-				addDependency(&context[mSensorCount], sensor_mag.handle);
-				mSensorCount++;
-			}
-
-			compositeVirtualSensorName(sensor_mag.name, virtualSensorName[LINEAR_ACCELERATION], SENSOR_TYPE_LINEAR_ACCELERATION);
-			ALOGD("liear acceleration virtual sensor name changed to %s\n", virtualSensorName[ORIENTATION]);
-			/* For linear acceleration */
-			if (!initVirtualSensor(&context[mSensorCount], SENSORS_HANDLE(mSensorCount),
-						virtualSensorList[LINEAR_ACCELERATION])) {
-				addDependency(&context[mSensorCount], sensor_acc.handle);
-				addDependency(&context[mSensorCount], sensor_mag.handle);
-				mSensorCount++;
-			}
-
-			compositeVirtualSensorName(sensor_mag.name, virtualSensorName[ROTATION_VECTOR], SENSOR_TYPE_ROTATION_VECTOR);
-			ALOGD("rotation vector virtual sensor name changed to %s\n", virtualSensorName[ROTATION_VECTOR]);
-			/* For rotation vector */
-			if (!initVirtualSensor(&context[mSensorCount], SENSORS_HANDLE(mSensorCount),
-						virtualSensorList[ROTATION_VECTOR])) {
-				addDependency(&context[mSensorCount], sensor_acc.handle);
-				addDependency(&context[mSensorCount], sensor_mag.handle);
-				mSensorCount++;
-			}
-
-			compositeVirtualSensorName(sensor_mag.name, virtualSensorName[GRAVITY], SENSOR_TYPE_GRAVITY);
-			ALOGD("gravity virtual sensor name changed to %s\n", virtualSensorName[GRAVITY]);
-			/* For gravity */
-			if (!initVirtualSensor(&context[mSensorCount], SENSORS_HANDLE(mSensorCount),
-						virtualSensorList[GRAVITY])) {
-				addDependency(&context[mSensorCount], sensor_acc.handle);
-				addDependency(&context[mSensorCount], sensor_mag.handle);
-				mSensorCount++;
-			}
 		}
 	}
 

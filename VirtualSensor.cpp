@@ -130,7 +130,7 @@ int VirtualSensor::injectEvents(sensors_event_t* data, int count)
 	for (i = 0; i < count; i++) {
 		event = data[i];
 		sensors_event_t out;
-		if (mFreeSpace) {
+		if (mFreeSpace && (event.type != SENSOR_TYPE_META_DATA)) {
 			if (algo->methods->convert(&event, &out, NULL))
 				continue;
 
